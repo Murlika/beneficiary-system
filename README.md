@@ -1,68 +1,47 @@
-# CodeIgniter 4 Application Starter
+# 🦕 BSR: Beneficiary Service Registry
 
-## What is CodeIgniter?
+**BSR (Beneficiary Service Registry)** — это высокопроизводительная система учета социальных услуг, оказанных благополучателям. Спроектирована для работы с большими объемами данных (1000+ записей) с упором на безопасность ПДн и отзывчивость интерфейса.
 
-CodeIgniter is a PHP full-stack web framework that is light, fast, flexible and secure.
-More information can be found at the [official site](https://codeigniter.com).
+## 🚀 Стек технологий
 
-This repository holds a composer-installable app starter.
-It has been built from the
-[development repository](https://github.com/codeigniter4/CodeIgniter4).
+*   **Backend:** PHP 8.2+ (Framework: **CodeIgniter 4**)
+*   **Frontend:** **Angular 17** (Standalone Components, Signals, HttpClient)
+*   **Database:** **PostgreSQL** (с использованием JSONB, GIN-индексов и Soft Deletes)
+*   **Styling:** Tailwind CSS + Shimmer Loading Effects
 
-More information about the plans for version 4 can be found in [CodeIgniter 4](https://forum.codeigniter.com/forumdisplay.php?fid=28) on the forums.
+## 🏗️ Архитектурные особенности
 
-You can read the [user guide](https://codeigniter.com/user_guide/)
-corresponding to the latest version of the framework.
+### 1. Гибридная отрисовка (Hybrid Rendering)
+Система использует PHP для отрисовки основного каркаса (Layout) и "шиммер-скелетонов". Это обеспечивает мгновенный LCP (Largest Contentful Paint). Основная логика реестра "оживает" через Angular-компоненты после загрузки JS.
 
-## Installation & updates
+### 2. Реактивное управление состоянием
+Вместо классических Observables на фронтенде используются **Angular Signals**, что гарантирует точечное обновление DOM при фильтрации 1000+ записей без лишних перерисовок.
 
-`composer create-project codeigniter4/appstarter` then `composer update` whenever
-there is a new release of the framework.
+### 3. Безопасность и ПДн (GDPR/ФЗ-152 Ready)
+*   **Минимизация данных:** Метод `findForRegistry` на бэкенде исключает передачу чувствительных полей (телефон, ИНН) в общий список.
+*   **JSONB Storage:** Дополнительные данные благополучателей хранятся в гибком формате JSONB с поддержкой GIN-индексации для мгновенного поиска.
+*   **Soft Delete:** Реализовано каскадное мягкое удаление для предотвращения потери истории операций.
 
-When updating, check the release notes to see if there are any changes you might need to apply
-to your `app` folder. The affected files can be copied or merged from
-`vendor/codeigniter4/framework/app`.
+### 4. Производительность БД
+*   Индексация внешних ключей (Foreign Keys) и дат.
+*   B-Tree индексы на ФИО для Live-поиска.
+*   Отсутствие `ON DELETE CASCADE` в пользу `RESTRICT` для обеспечения целостности данных.
 
-## Setup
+## 🛠️ Установка и запуск
 
-Copy `env` to `.env` and tailor for your app, specifically the baseURL
-and any database settings.
-
-## Important Change with index.php
-
-`index.php` is no longer in the root of the project! It has been moved inside the *public* folder,
-for better security and separation of components.
-
-This means that you should configure your web server to "point" to your project's *public* folder, and
-not to the project root. A better practice would be to configure a virtual host to point there. A poor practice would be to point your web server to the project root and expect to enter *public/...*, as the rest of your logic and the
-framework are exposed.
-
-**Please** read the user guide for a better explanation of how CI4 works!
-
-## Repository Management
-
-We use GitHub issues, in our main repository, to track **BUGS** and to track approved **DEVELOPMENT** work packages.
-We use our [forum](http://forum.codeigniter.com) to provide SUPPORT and to discuss
-FEATURE REQUESTS.
-
-This repository is a "distribution" one, built by our release preparation script.
-Problems with it can be raised on our forum, or as issues in the main repository.
-
-## Server Requirements
-
-PHP version 8.1 or higher is required, with the following extensions installed:
-
-- [intl](http://php.net/manual/en/intl.requirements.php)
-- [mbstring](http://php.net/manual/en/mbstring.installation.php)
-
-> [!WARNING]
-> - The end of life date for PHP 7.4 was November 28, 2022.
-> - The end of life date for PHP 8.0 was November 26, 2023.
-> - If you are still using PHP 7.4 or 8.0, you should upgrade immediately.
-> - The end of life date for PHP 8.1 will be December 31, 2025.
-
-Additionally, make sure that the following extensions are enabled in your PHP:
-
-- json (enabled by default - don't turn it off)
-- [mysqlnd](http://php.net/manual/en/mysqlnd.install.php) if you plan to use MySQL
-- [libcurl](http://php.net/manual/en/curl.requirements.php) if you plan to use the HTTP\CURLRequest library
+1. **Бэкенд:**
+   ```bash
+   composer install
+   php spark migrate:refresh --all -sed MainSeeder
+   php spark serve
+   ```
+2. **Фронтенд:**
+```bash
+cd frontend
+npm install
+npx ng build --watch --configuration development
+```
+3. **База данных:**
+```bash
+Создайте БД diplodoc_db в PostgreSQL и укажите доступы в .env.
+```
