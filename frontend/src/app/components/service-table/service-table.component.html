@@ -1,0 +1,180 @@
+<div class="space-y-6">
+    
+    <!-- 1. HEADER -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+            <h1 class="text-3xl font-black text-slate-800 tracking-tight">Единый реестр услуг</h1>
+            <p class="text-slate-500 text-sm mt-1">
+                Найдено <span class="font-bold text-indigo-600">{{ services().length | number }}</span> записей
+            </p>
+        </div>
+        
+        <div class="flex items-center gap-3">
+            <button (click)="exportToExcel()" 
+                    class="flex items-center gap-2 bg-white border border-slate-200 text-slate-700 px-5 py-2.5 rounded-2xl font-bold hover:bg-slate-50 hover:border-slate-300 transition-all shadow-sm active:scale-95">
+                <span class="text-lg">📥</span>
+                <span class="text-sm uppercase tracking-wide">Экспорт .xlsx</span>
+            </button>
+            
+            <button routerLink="/services/new" class="flex items-center gap-2 bg-indigo-600 text-white px-6 py-2.5 rounded-2xl font-bold hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200 active:scale-95">
+                <span class="text-xl">+</span>
+                <span class="text-sm uppercase tracking-wide">Добавить услугу</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- 2. ФИЛЬТРАЦИЯ -->
+    <div class="bg-white p-2 rounded-[2rem] shadow-sm border border-slate-200 flex flex-wrap lg:flex-nowrap items-center gap-2">
+        <div class="relative flex-1 min-w-[300px]">
+            <span class="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400">🔍</span>
+            <input type="text" 
+                   #searchInput
+                   (input)="onSearch(searchInput.value)"
+                   placeholder="Поиск по ФИО или названию услуги..." 
+                   class="w-full pl-14 pr-6 py-4 bg-transparent border-none focus:ring-0 text-slate-700 placeholder:text-slate-400 font-medium">
+        </div>
+
+<div class="relative flex-1 min-w-[300px] group">
+    <span class="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400">🔍</span>
+    
+    <input #aiSearch
+           type="text" 
+           placeholder="Просто напиши: кто был вчера?.."
+           (keyup.enter)="askAiToFilter(aiSearch.value)" 
+           class="w-full pl-14 pr-16 py-4 bg-transparent border-none focus:ring-0 text-slate-700 font-medium">
+           
+    <!-- МАГИЧЕСКАЯ КНОПКА ИИ -->
+    <button (click)="askAiToFilter(aiSearch.value)"
+            class="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-indigo-50 text-indigo-600 rounded-xl hover:bg-indigo-600 hover:text-white transition-all shadow-sm flex items-center justify-center border border-indigo-100">
+        {{ ai.isLoading() ? '⏳' : '🦕' }}
+    </button>
+</div>
+
+        <div class="hidden lg:block w-px h-10 bg-slate-100"></div>
+
+        <select #statusSelect 
+                (change)="onStatusChange(statusSelect.value)"
+                class="bg-transparent border-none focus:ring-0 px-6 py-4 text-slate-600 font-semibold cursor-pointer hover:text-indigo-600 transition-colors">
+            <option value="">Все статусы</option>
+            @for (status of statusOptions(); track status.value) {
+                <option [value]="status.value">
+                {{ getStatusLabel(status.value) }}
+                </option>
+            }
+        </select>
+
+        <button (click)="loadData()" 
+                class="bg-slate-900 text-white px-8 py-3.5 rounded-2xl font-bold text-sm uppercase tracking-wider hover:bg-indigo-600 transition-all ml-auto mr-1">
+            Найти
+        </button>
+    </div>
+
+    <!-- 3. ТАБЛИЦА -->
+    <div class="bg-white rounded-[2.5rem] shadow-sm border border-slate-200 overflow-hidden relative">
+        
+        <table class="w-full text-left border-collapse">
+            <thead class="bg-slate-50/50 border-b border-slate-100">
+                <tr class="text-[11px] uppercase tracking-[0.15em] text-slate-400 font-black">
+
+                    <th (click)="toggleSort('service_date')" 
+                        class="px-6 py-4 cursor-pointer hover:bg-slate-50 transition-colors group">
+                    <div class="flex items-center space-x-2">
+                        <span class="text-[10px] uppercase font-black text-slate-400 tracking-widest">Дата оказания</span>
+                        
+                        <!-- ИКОНКА СОРТИРОВКИ -->
+                        <span class="text-[10px] transition-all" 
+                            [class.text-indigo-500]="sortColumn() === 'service_date'"
+                            [class.opacity-100]="sortColumn() === 'service_date'"
+                            class="opacity-0 group-hover:opacity-100"> 
+                        {{ sortDirection() === 'ASC' ? '▲' : '▼' }}
+                        </span>
+                    </div>
+                    </th>
+
+                    <th class="px-8 py-5">Благополучатель</th>
+                    <th class="px-8 py-5">Услуга</th>
+                    <th class="px-8 py-5">Статус</th>
+                    <th class="px-8 py-5">Сумма</th>
+                    <th class="px-8 py-5 text-right">Действия</th>
+                </tr>
+            </thead>
+            
+            <tbody class="divide-y divide-slate-50">
+                @if (isLoading()) {
+                    <!-- ШИММЕР -->
+                    @for (i of [1,2,3,4,5]; track $index) {
+                        <tr class="animate-pulse">
+                            <td class="px-8 py-5"><div class="h-4 bg-slate-100 rounded w-20"></div></td>
+                            <td class="px-8 py-5"><div class="h-4 bg-slate-100 rounded w-40"></div></td>
+                            <td class="px-8 py-5"><div class="h-4 bg-slate-100 rounded w-32"></div></td>
+                            <td class="px-8 py-5"><div class="h-6 bg-slate-100 rounded-full w-24"></div></td>
+                            <td class="px-8 py-5"><div class="h-4 bg-slate-100 rounded w-16 ml-auto"></div></td>
+                            <td class="px-8 py-5"><div class="h-8 bg-slate-100 rounded-lg w-8 ml-auto"></div></td>
+                        </tr>
+                    }
+                } @else {
+                    @for (item of services(); track item.id) {
+                        <tr class="hover:bg-slate-50/50 transition-colors group">
+                            <td class="px-8 py-5 text-sm font-medium text-slate-500 whitespace-nowrap">
+                                {{ item.service_date | date:'dd.MM.yyyy' }}
+                            </td>
+                            <td class="px-8 py-5">
+                                <div class="text-sm font-bold text-slate-800">{{ item.beneficiary_name }}</div>
+                                <div class="text-[10px] text-slate-400 uppercase tracking-tighter">ID: #{{ item.id }}</div>
+                            </td>
+                            <td class="px-8 py-5">
+                                <span class="text-sm text-slate-600 font-medium">{{ item.service_title }}</span>
+                                @if (item.comment) {
+                                    <div class="text-[10px] text-slate-400 italic truncate max-w-[150px]">{{ item.comment }}</div>
+                                }
+                            </td>
+                            <td class="px-8 py-5">
+                                <!-- ЦВЕТНЫЕ СТАТУСЫ ПО ENUM -->
+                                    <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border transition-all"
+                                        [ngClass]="{
+                                            'bg-blue-50 text-blue-600 border-blue-100': item.status === statuses.NEW,
+                                            'bg-amber-50 text-amber-600 border-amber-100': item.status === statuses.PENDING || item.status === statuses.IN_PROGRESS,
+                                            'bg-emerald-50 text-emerald-600 border-emerald-100': item.status === statuses.COMPLETED,
+                                            'bg-rose-50 text-rose-600 border-rose-100': item.status === statuses.CANCELED
+                                        }">
+                                        {{ statusLabels[item.status] || item.status }}
+                                    </span>
+                            </td>
+                            <td class="px-8 py-5 text-sm font-bold text-slate-700 whitespace-nowrap">
+                                {{ item.amount | number:'1.0-0' }} ₽
+                            </td>
+                            <td class="px-8 py-5 text-right whitespace-nowrap">
+                                <div class="opacity-0 group-hover:opacity-100 transition-opacity flex justify-end gap-1">
+                                    <button  [routerLink]="['/services/edit', item.id]"  class="text-slate-400 hover:text-indigo-600 p-2 hover:bg-indigo-50 rounded-xl transition-all">⚙️</button>
+                                    <button  (click)="deleteService(item.id)"  class="text-slate-400 hover:text-red-500 p-2 hover:bg-red-50 rounded-xl transition-all">🗑️</button>
+                                </div>
+                            </td>
+                        </tr>
+                    } @empty {
+                        <tr>
+                            <td colspan="6" class="px-8 py-32 text-center">
+                                <div class="flex flex-col items-center gap-4">
+                                    <span class="text-7xl animate-float">🦕</span>
+                                    <p class="text-slate-400 text-lg italic font-light">Диплодок обыскал всё, но услуг не нашел...</p>
+                                    <button (click)="loadData(searchInput.value, statusSelect.value)" class="text-indigo-600 font-bold hover:underline text-sm uppercase tracking-widest">Обновить данные</button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+<app-dino-paginator 
+    [total]="totalElements()" 
+    [pageSize]="pageSize" 
+    [currentPage]="currentPage"
+    (pageChange)="onPageChange($event)"
+    (pageSizeChange)="onLimitChange($event)">
+</app-dino-paginator>
+        @if (isLoading()) {
+            <div class="p-8 text-center bg-slate-50/30 border-t border-slate-50">
+                <p class="text-slate-400 text-sm font-medium italic animate-pulse tracking-tight">🦖 Диплодок разминает шею... Синхронизация данных</p>
+            </div>
+        }
+    </div>
+</div>

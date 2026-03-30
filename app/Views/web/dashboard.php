@@ -1,8 +1,9 @@
 <?= $this->extend('layout/main') ?>
 
 <?= $this->section('content') ?>
-<app-root>
 
+
+<app-service-table>
 <div class="space-y-6">
     
     <!-- 1. HEADER С ДЕЙСТВИЯМИ -->
@@ -101,5 +102,5 @@
         </app-services-registry>
     </div>
 </div>
-</app-root>
+                    </app-service-table>
 <?= $this->endSection() ?>

@@ -46,8 +46,12 @@ class BeneficiaryModel extends Model
 
     // ТЗ: Удобный поиск/автодополнение (для 1000+ записей)
     public function search(string $term, int $limit = 10) {
-        return $this->like('full_name', $term, 'both', null, true)
+        // 🔍 Используем ILIKE (через 5-й параметр true)
+        // Ограничиваем выборку  только публичные поля
+        return $this->select('id, full_name, type')
+                    ->like('full_name', $term, 'both', null, true) 
                     ->orderBy('full_name', 'ASC')
+                    ->orderBy('id', 'ASC') // Соблюдаем структуру индекса 🧬
                     ->findAll($limit);
     }
 
@@ -57,18 +61,29 @@ class BeneficiaryModel extends Model
     public function findForRegistry(array $filters = [], int $limit = 20, int $offset = 0)
     {
         $builder = $this->builder();
-        
         // Выбираем только публичные поля
         $builder->select('id, full_name, type, created_at');
- 
+
+        // 🛡️ Фильтруем вымерших! 
+        $builder->where('deleted_at IS NULL'); 
+
         if (!empty($filters['search'])) {
+            // Используем ILIKE для поиска без учета регистра 🔍
             $builder->like('full_name', $filters['search'], 'both', null, true);
         }
 
-        return $builder->orderBy('full_name', 'ASC')
-                    ->limit($limit, $offset)
-                    ->get()
-                    ->getResultArray(); 
+        $totalCount = (clone $builder)->countAllResults();
+
+        $data = $builder->orderBy('full_name', 'ASC')
+                        ->orderBy('id', 'ASC') 
+                        ->limit($limit, $offset)
+                        ->get()
+                        ->getResultArray();
+
+        return [
+            'data'  => $data,
+            'total' => $totalCount // Возвращаем для Angular Paginator
+        ];
     }
 
 }

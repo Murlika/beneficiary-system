@@ -53,3 +53,9 @@ Events::on('pre_system', static function (): void {
         }
     }
 });
+
+Events::on('DBQuery', function ($query) {
+    if ($query->getDuration() > 2) { // Slow Query > 2 сек
+        dino_log('warning', 'DB', 'SLOW_QUERY', "Черепаший запрос: " . $query->getQuery(), ['time' => $query->getDuration()]);
+    }
+});

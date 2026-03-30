@@ -4,7 +4,6 @@ namespace App\Controllers\Api;
 
 use CodeIgniter\HTTP\ResponseInterface;
 use CodeIgniter\RESTful\ResourceController;
-use App\Models\ServiceModel;
 
 class Services extends ResourceController
 {   
@@ -23,11 +22,27 @@ class Services extends ResourceController
             'search' => $this->request->getGet('search'),
             'status' => $this->request->getGet('status'),
             'date'   => $this->request->getGet('date'),
+            'sort'   => $this->request->getGet('sort') ?? 'service_date', 
+            'order'  => $this->request->getGet('order') ?? 'DESC',            
         ];
 
+    dino_log('info', 'REGISTRY', 'FETCH_LIST', "Диплодок запрашивает список услуг", [
+        'filters' => array_filter($filters), 
+        'page'    => $this->request->getGet('page') ?? 1
+    ]);
+
+    try {
         $data = $this->model->getRegistry($filters);
 
+        dino_log('debug', 'REGISTRY', 'FETCH_SUCCESS', "Извлечено окаменелостей: " . count($data));
+
         return $this->respond($data);
+
+    } catch (\Exception $e) {
+        dino_log('error', 'REGISTRY', 'FETCH_CRASH', "Обвал в шахте при поиске: " . $e->getMessage());
+        return $this->failServerError('Ошибка при раскопках реестра... 🌋');
+    }
+
     }
 
     /**
@@ -39,8 +54,15 @@ class Services extends ResourceController
      */
     public function show($id = null)
     {
-        //
+        // Берем с JOIN, чтобы Angular сразу увидел имя бенефициара для автокомплита
+        $record = $this->model
+            ->select('services.*, beneficiaries.full_name as beneficiary_name')
+            ->join('beneficiaries', 'beneficiaries.id = services.beneficiary_id')
+            ->find($id);
+
+        return $record ? $this->respond($record) : $this->failNotFound("Услуга не найдена 🦴");
     }
+
 
     /**
      * Return a new resource object, with default properties.
@@ -59,7 +81,13 @@ class Services extends ResourceController
      */
     public function create()
     {
-        //
+        $data = $this->request->getJSON(true);
+        
+        if ($id = $this->model->insert($data)) {
+            return $this->respondCreated(['id' => $id, 'message' => 'Услуга зарегистрирована! ✨']);
+        }
+        
+        return $this->failValidationErrors($this->model->errors());
     }
 
     /**
@@ -83,7 +111,13 @@ class Services extends ResourceController
      */
     public function update($id = null)
     {
-        //
+        $data = $this->request->getJSON(true);
+
+        if ($this->model->update($id, $data)) {
+            return $this->respond(['message' => 'Данные услуги мутировали успешно 🧪']);
+        }
+
+        return $this->failValidationErrors($this->model->errors());
     }
 
     /**
@@ -95,6 +129,9 @@ class Services extends ResourceController
      */
     public function delete($id = null)
     {
-        //
+        if ($this->model->delete($id)) {
+            return $this->respondDeleted(['message' => 'Услуга аннигилирована 📦']);
+        }
+        return $this->failNotFound("Не удалось удалить... 🌋");
     }
 }

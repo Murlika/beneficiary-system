@@ -1,0 +1,127 @@
+
+<div class="space-y-10">
+    
+    <!-- HEADER -->
+    <div class="max-w-4xl mx-auto text-center space-y-2">
+        <h1 class="text-4xl font-black text-slate-800 tracking-tight">Работа с данными Excel</h1>
+        <p class="text-slate-500 text-lg">Массовое управление реестром через электронные таблицы</p>
+    </div>
+
+        <!-- ТЗ п.3: Напоминалка про валидацию -->
+    <div class="mx-auto bg-amber-50 border border-amber-100 p-6 rounded-[2rem] flex items-start space-x-4">
+        <span class="text-2xl">⚠️</span>
+        <p class="text-sm text-amber-800 leading-relaxed">
+            <strong>Внимание:</strong> При импорте система проверяет ФИО благополучателей и типы услуг. Если запись не найдена, она будет пропущена или помечена как ошибочная.
+        </p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 max-w-6xl mx-auto">
+        
+        <!-- КАРТОЧКА ИМПОРТА (ТЗ п.3) -->
+        <div class="bg-white rounded-[3rem] border border-slate-200 shadow-sm p-10 flex flex-col items-center text-center space-y-6">
+            <div class="w-20 h-20 bg-indigo-50 rounded-3xl flex items-center justify-center text-4xl shadow-inner">📥</div>
+            <div>
+                <h3 class="text-2xl font-bold text-slate-800">Импорт реестра</h3>
+                    <p class="text-slate-400 text-sm mt-2 leading-relaxed">
+                        Загрузите <b>.xlsx</b> файл (макс. <b>{{ maxFileSizeLabel }}</b>).
+                        <br>Система автоматически сопоставит данные и проверит валидность полей.
+                    </p>
+            </div>
+            
+            <!-- Контейнер для Angular -->
+<!-- excel-uploader.component.html -->
+            
+            @if (message() && !isUploading()) {
+                <div class="mb-6 p-4 rounded-2xl animate-in fade-in slide-in-from-top-4 duration-300"
+                    [ngClass]="importErrors().length > 0 ? 'bg-amber-50 border border-amber-100' : 'bg-emerald-50 border border-emerald-100'">
+                    <div class="flex items-center space-x-3">
+                        <span class="text-xl">{{ importErrors().length > 0 ? '⚠️' : '✅' }}</span>
+                        <p class="text-sm font-bold" 
+                        [ngClass]="importErrors().length > 0 ? 'text-amber-800' : 'text-emerald-800'">
+                            {{ message() }}
+                        </p>
+                    </div>
+                </div>
+            }
+
+
+<div class="relative w-full border-4 border-dashed rounded-[2rem] p-12 transition-all group"
+     [ngClass]="isUploading() ? 'border-indigo-300 bg-indigo-50' : 'border-slate-50 hover:border-indigo-100'">
+    
+    <input type="file" 
+           (change)="onFileSelected($event)" 
+           accept=".xlsx, .xls"
+           class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+           [disabled]="isUploading()">
+
+            <div class="flex flex-col items-center w-full">
+                <div class="text-4xl mb-4" [class.animate-pulse]="isUploading()">
+                    {{ isUploading() ? '⚙️' : '📄' }}
+                </div>
+                
+                <span class="text-slate-600 font-bold mb-2">
+                    {{ isUploading() ? 'Анализируем строки...' : 'Нажмите или перетащите файл' }}
+                </span>
+
+                <!-- PROGRESS BAR -->
+                @if (isUploading()) {
+                    <div class="w-full max-w-xs bg-slate-200 h-2 rounded-full overflow-hidden mt-4">
+                        <div class="bg-indigo-600 h-full transition-all duration-300" 
+                            [style.width.%]="progress()"></div>
+                    </div>
+                }
+
+            @if (aiChanges().length > 0) {
+                <div class="mt-4 w-full text-left bg-indigo-50 border border-indigo-100 rounded-2xl p-4">
+                    <p class="text-[10px] font-black text-indigo-600 uppercase tracking-widest mb-2">✨ Магия Диплодока (исправлено):</p>
+                    <ul class="text-[11px] text-indigo-500 space-y-1 max-h-32 overflow-y-auto custom-scrollbar">
+                        @for (change of aiChanges(); track $index) {
+                            <li>• Строка {{ change.rowNum }}: Автоматически исправлен статус/услуга</li>
+                        }
+                    </ul>
+                </div>
+            }
+
+                <!-- ERRORS LIST (ТЗ п.3) -->
+                @if (importErrors().length > 0) {
+                    <div class="mt-6 w-full text-left bg-red-50 rounded-2xl p-4 border border-red-100">
+                        <p class="text-xs font-bold text-red-600 uppercase mb-2">Ошибки в файле:</p>
+                        <ul class="text-[11px] text-red-500 space-y-1 max-h-32 overflow-y-auto custom-scrollbar">
+                            @for (error of importErrors(); track $index) {
+                                <li>• {{ error }}</li>
+                            }
+                        </ul>
+                    </div>
+                }
+            </div>
+</div>
+
+            <a href="api/export/template" class="text-indigo-600 text-xs font-bold uppercase tracking-widest hover:underline">
+                📄 Скачать шаблон (.xlsx)
+            </a>
+        </div>
+
+        <!-- КАРТОЧКА ЭКСПОРТА (ТЗ п.2) -->
+        <div class="bg-white rounded-[3rem] border border-slate-200 shadow-sm p-10 flex flex-col items-center text-center space-y-6">
+            <div class="w-20 h-20 bg-emerald-50 rounded-3xl flex items-center justify-center text-4xl shadow-inner">📤</div>
+            <div>
+                <h3 class="text-2xl font-bold text-slate-800">Экспорт данных</h3>
+                <p class="text-slate-400 text-sm mt-2 leading-relaxed">Выгрузка текущего реестра с учётом применённых фильтров и поиска в один клик.</p>
+            </div>
+
+    <div class="w-full">
+        <a href="api/export" 
+           class="block w-full py-5 bg-emerald-600 text-white rounded-[2rem] font-black uppercase tracking-widest hover:bg-emerald-500 hover:shadow-lg hover:shadow-emerald-100 transition-all active:scale-95 text-center">
+            Сгенерировать .XLSX
+        </a>
+        <p class="mt-4 text-[10px] text-slate-400 uppercase font-bold tracking-tighter italic">
+            Данные будут выгружены из PostgreSQL
+        </p>
+    </div>
+
+            <p class="text-[10px] text-slate-400 uppercase font-bold tracking-tighter italic">Формат файла: Microsoft Excel (.xlsx)</p>
+        </div>
+
+    </div>
+
+</div>

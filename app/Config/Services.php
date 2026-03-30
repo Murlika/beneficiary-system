@@ -3,6 +3,7 @@
 namespace Config;
 
 use CodeIgniter\Config\BaseService;
+use App\Services\AiService;
 
 /**
  * Services Configuration file.
@@ -29,4 +30,11 @@ class Services extends BaseService
      *     return new \CodeIgniter\Example();
      * }
      */
+    public static function ai($getShared = true) {
+        if ($getShared) {
+            return static::getSharedInstance('ai');
+        }
+
+        return new AiService();
+    }
 }

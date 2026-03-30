@@ -1,0 +1,87 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "DIPLO-DOC API 🦖",
+    "description": "Древние свитки реестра услуг благополучателей. Все пути ведут в API.",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080/api",
+      "description": "Локальная пещера разработки"
+    }
+  ],
+  "paths": {
+    "/beneficiaries/search": {
+      "get": {
+        "summary": "Автокомплит бенефициаров 🔍",
+        "parameters": [
+          { "name": "term", "in": "query", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": { "200": { "description": "Список подходящих диплодоков" } }
+      }
+    },
+    "/clientLog": {
+      "post": {
+        "summary": "Логирование с фронтенда 📜",
+        "responses": { "200": { "description": "Рык услышан" } }
+      }
+    },
+     "/services": {
+      "get": {
+        "summary": "Реестр услуг (ТЗ п.1) 🐾",
+        "parameters": [
+          { "name": "search", "in": "query", "schema": { "type": "string" }, "description": "Поиск по ФИО или услуге" },
+          { "name": "status", "in": "query", "schema": { "type": "string" }, "description": "Фильтр по статусу (new, done...)" },
+          { "name": "page", "in": "query", "schema": { "type": "integer", "default": 1 } },
+          { "name": "limit", "in": "query", "schema": { "type": "integer", "default": 20 } },
+          { "name": "sort", "in": "query", "schema": { "type": "string", "default": "service_date" }, "description": "Поле для сортировки" },
+          { "name": "order", "in": "query", "schema": { "type": "string", "enum": ["ASC", "DESC"], "default": "DESC" } }
+        ],
+        "responses": {
+          "200": { "description": "Список с пагинацией и totalCount" }
+        }
+      },
+      "post": {
+        "summary": "Создать запись (ТЗ п.5) 🥚",
+        "responses": { "201": { "description": "Запись зарыта в базу" } }
+      }
+    },
+    "/services/{id}": {
+      "put": { "summary": "Обновить услугу (ТЗ п.4) 📝" },
+      "delete": { "summary": "Удалить услугу (ТЗ п.6) 🌋" }
+    },
+    "/import": {
+      "post": {
+        "summary": "Умный импорт Excel (ТЗ п.3) 📥",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": { "excel_file": { "type": "string", "format": "binary" } }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "JSON с количеством успехов, списком ошибок и правками ИИ"
+          }
+        }
+      }
+    },
+    "/export": {
+      "get": { "summary": "Экспорт реестра (ТЗ п.2) 📤" }
+    },
+    "/export/template": {
+      "get": { "summary": "Скачать шаблон с выпадашками 📄" }
+    },
+    "/ask": {
+      "post": {
+        "summary": "AI-фильтрация (Human language to SQL) 🤖",
+        "responses": { "200": { "description": "Распаршенные фильтры для таблицы" } }
+      }
+    }
+  }
+}

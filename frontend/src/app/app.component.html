@@ -1,33 +1,31 @@
+<!-- Тостеры (Нотисы) -->
+<!-- <app-notifications /> -->
 
-<tbody class="divide-y divide-slate-50">
-  @for (item of services(); track item.id) {
-    <tr class="hover:bg-slate-50/50 transition-colors group">
-      <td class="px-8 py-5 text-sm font-medium text-slate-500">
-        {{ item.service_date | date:'dd.MM.yyyy' }}
-      </td>
-      <td class="px-8 py-5">
-        <div class="text-sm font-bold text-slate-800">{{ item.beneficiary_name }}</div>
-        <div class="text-[10px] text-slate-400 uppercase tracking-tighter">ID: #{{ item.id }}</div>
-      </td>
-      <td class="px-8 py-5">
-        <span class="text-sm text-slate-600">{{ item.service_title }}</span>
-      </td>
-      <td class="px-8 py-5">
-        <span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-indigo-50 text-indigo-600 border border-indigo-100">
-          {{ item.status }}
-        </span>
-      </td>
-      <td class="px-8 py-5 text-right">
-        <button class="text-slate-400 hover:text-indigo-600 transition-colors p-2">⚙️</button>
-        <button class="text-slate-400 hover:text-red-500 transition-colors p-2">🗑️</button>
-      </td>
-    </tr>
-  } @empty {
+<!-- Глобальный блокирующий лоадер -->
+@if (globalLoading()) {
+  <div class="fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-[100] flex items-center justify-center">
+    <div class="bg-white p-6 rounded-[2rem] shadow-xl flex items-center gap-4">
+      <span class="animate-spin text-3xl">⚙️</span>
+      <span class="font-bold text-slate-700">Диплодок работает...</span>
+    </div>
+  </div>
+}
 
-    <tr>
-      <td colspan="5" class="px-8 py-20 text-center text-slate-400 italic">
-        🦕 Диплодок обыскал всё, но услуг не нашел...
-      </td>
-    </tr>
-  }
-</tbody>
+<!-- Слот для модалок -->
+<!-- <app-modal-outlet /> -->
+
+<pre class="bg-black text-green-400 p-2 text-xs">
+  DEBUG: page = "{{ currentPage() }}" | length = {{ currentPage().length }}
+</pre>
+
+<div class="php-container border-2 border-dashed border-slate-200">
+  <!-- 🚩 Магия здесь: всё из PHP попадет сюда -->
+  <ng-content></ng-content>
+</div>
+
+<main class="min-h-screen bg-slate-50">
+
+  <router-outlet></router-outlet>
+  
+</main>
+<app-ai-widget />

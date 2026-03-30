@@ -1,0 +1,29 @@
+<div class="bg-slate-50/80 border-t border-slate-100 px-8 py-5 flex items-center justify-between gap-4">
+    <div class="text-[11px] text-slate-400 font-black uppercase tracking-widest">
+        Найдено: <span class="text-indigo-600">{{ total }}</span> следов
+    </div>
+
+    <div class="flex items-center gap-6">
+        <!-- Ввод страницы -->
+        <div class="flex items-center gap-2 text-xs font-bold text-slate-500">
+            <span>Стр.</span>
+            <input type="number" [value]="currentPage" (change)="onPageInput($event)"
+                   class="w-12 py-1 px-2 bg-white border border-slate-200 rounded-lg text-center text-indigo-600 outline-none">
+            <span>из {{ totalPages }}</span>
+        </div>
+
+        <!-- Кнопки -->
+        <div class="flex items-center bg-white rounded-2xl border border-slate-200 p-1 shadow-sm">
+            <button (click)="changePage(-1)" [disabled]="currentPage === 1" class="w-9 h-9 flex items-center justify-center rounded-xl disabled:opacity-20">⬅️</button>
+            <div class="w-px h-4 bg-slate-100 mx-1"></div>
+            <button (click)="changePage(1)" [disabled]="currentPage >= totalPages" class="w-9 h-9 flex items-center justify-center rounded-xl disabled:opacity-20">➡️</button>
+        </div>
+
+        <!-- Лимит -->
+        <select (change)="onLimitChange($event)" class="bg-white border border-slate-200 rounded-2xl px-4 py-2 text-xs font-bold text-slate-600 outline-none cursor-pointer shadow-sm">
+            <option [value]="5">5 / стр</option>
+            <option [value]="10" selected>10 / стр</option>
+            <option [value]="25">25 / стр</option>
+        </select>
+    </div>
+</div>

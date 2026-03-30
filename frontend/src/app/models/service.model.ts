@@ -3,9 +3,12 @@
  */
 export interface ServiceRecord {
   id: number;
+  // 🔗 Связи (ID для формы)
+  beneficiary_id: number; 
+  type_id: number;
   
   service_date: string;
-  status: string;
+  status: ServiceStatus;
   amount: number;
   comment?: string;
   
@@ -14,6 +17,8 @@ export interface ServiceRecord {
   
   created_at?: string;
   deleted_at?: string;
+
+  
 }
 
 /**
@@ -26,3 +31,14 @@ export enum ServiceStatus {
   COMPLETED = 'completed',
   CANCELED = 'canceled'
 }
+
+declare global {
+  interface Window {
+    APP_CONFIG: {
+      statuses: Record<ServiceStatus, string>;
+    };
+  }
+}
+
+// Вытаскиваем человекочитаемые названия из PHP
+export const STATUS_LABELS = window.APP_CONFIG?.statuses || {} as Record<ServiceStatus, string>;

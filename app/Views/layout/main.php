@@ -1,3 +1,6 @@
+<?php
+helper('system'); // CI4 сам найдет system_helper.php
+?>
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -37,23 +40,25 @@
             <!-- Nav -->
             <nav class="flex-1 px-4 space-y-1.5">
                 <a href="<?= base_url('dashboard') ?>" 
-                   class="group flex items-center space-x-3 p-3.5 rounded-2xl transition-all hover:bg-indigo-800/50 <?= (current_url() == base_url('dashboard') || current_url() == base_url()) ? 'bg-indigo-600 shadow-lg shadow-indigo-900/50 text-white' : 'text-indigo-200' ?>">
+                   class="group flex items-center space-x-3 p-3.5 rounded-2xl transition-all hover:bg-indigo-800/50 <?= is_page_active('services') ?>">
                     <span class="text-xl">📊</span>
                     <span class="font-semibold tracking-wide text-sm uppercase">Реестр услуг</span>
                 </a>
 
                 <a href="<?= base_url('beneficiaries') ?>" 
-                   class="group flex items-center space-x-3 p-3.5 rounded-2xl transition-all hover:bg-indigo-800/50 <?= current_url() == base_url('beneficiaries') ? 'bg-indigo-600 shadow-lg shadow-indigo-900/50 text-white' : 'text-indigo-200' ?>">
+                   class="group flex items-center space-x-3 p-3.5 rounded-2xl transition-all hover:bg-indigo-800/50 <?= is_page_active('beneficiaries') ?>">
                     <span class="text-xl">👥</span>
                     <span class="font-semibold tracking-wide text-sm uppercase text-opacity-80">Благополучатели</span>
                 </a>
 
                 <a href="<?= base_url('import') ?>" 
-                   class="group flex items-center space-x-3 p-3.5 rounded-2xl transition-all hover:bg-indigo-800/50 <?= current_url() == base_url('import') ? 'bg-indigo-600 shadow-lg shadow-indigo-900/50 text-white' : 'text-indigo-200' ?>">
+                   class="group flex items-center space-x-3 p-3.5 rounded-2xl transition-all hover:bg-indigo-800/50 <?= is_page_active('import') ?>">
                     <span class="text-xl">📥</span>
                     <span class="font-semibold tracking-wide text-sm uppercase text-opacity-80">Импорт/Экспорт</span>
                 </a>
-            </nav>
+            </nav>                
+
+
 
             <!-- Bottom Badge -->
             <div class="p-6">
@@ -85,11 +90,12 @@
             </header>
 
             <!-- Content -->
-            <main class="flex-1 overflow-y-auto p-10">
+            <main class="flex-1 overflow-y-auto p-10 mat-app-background indigo-pink-theme">
                 <div class="max-w-7xl mx-auto">
 
-                    
+                    <app-root data-page="<?= get_current_angular_page() ?>">
                         <?= $this->renderSection('content') ?>
+                    </app-root>   
                     
                 </div>
             </main>
@@ -98,5 +104,16 @@
 <!-- Подключаем скрипты Ангуляра из папки public/dist -->
 <script src="<?= base_url('dist/browser/polyfills.js') ?>" type="module"></script>
 <script src="<?= base_url('dist/browser/main.js') ?>" type="module"></script>
+
+<script>
+    window.APP_CONFIG = {
+        limits: <?php echo json_encode([
+            'upload_max' => dino_parse_size(ini_get('upload_max_filesize')),
+            'display'    => ini_get('upload_max_filesize')
+        ]); ?>,
+        statuses: <?= json_encode(\App\Entities\Service::getStatusList()) ?>
+    };
+</script>
+
 </body>
 </html>

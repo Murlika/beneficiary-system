@@ -1,0 +1,14 @@
+/* Убираем стандартные рамки и фоны Material */
+::ng-deep .mat-mdc-paginator {
+    font-family: inherit !important;
+}
+
+::ng-deep .mat-mdc-paginator-container {
+    justify-content: flex-end !important;
+    padding: 0 !important;
+}
+
+::ng-deep .mat-mdc-icon-button {
+    border-radius: 12px !important; /* В стиле твоих кнопок ⚙️ */
+}
+

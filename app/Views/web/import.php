@@ -48,13 +48,15 @@
                 <p class="text-slate-400 text-sm mt-2 leading-relaxed">Выгрузка текущего реестра с учётом применённых фильтров и поиска в один клик.</p>
             </div>
 
-            <!-- Контейнер для Angular -->
-            <app-excel-exporter class="w-full">
-                <div class="space-y-4">
-                    <div class="h-16 shimmer rounded-[2rem] w-full"></div>
-                    <div class="h-4 shimmer w-2/3 mx-auto rounded-full opacity-30"></div>
-                </div>
-            </app-excel-exporter>
+    <div class="w-full">
+        <a href="<?= base_url('api/export') ?>" 
+           class="block w-full py-5 bg-emerald-600 text-white rounded-[2rem] font-black uppercase tracking-widest hover:bg-emerald-500 hover:shadow-lg hover:shadow-emerald-100 transition-all active:scale-95 text-center">
+            Сгенерировать .XLSX
+        </a>
+        <p class="mt-4 text-[10px] text-slate-400 uppercase font-bold tracking-tighter italic">
+            Данные будут выгружены из PostgreSQL
+        </p>
+    </div>
 
             <p class="text-[10px] text-slate-400 uppercase font-bold tracking-tighter italic">Формат файла: Microsoft Excel (.xlsx)</p>
         </div>
