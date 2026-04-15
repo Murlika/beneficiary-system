@@ -34,7 +34,7 @@
 ### 2. Фронтенд (Angular 17)
 Находится в папке `/frontend`.
 1.  **Установка пакетов:** `npm install`
-2.  **Запуск:** `ng serve` (Интерфейс: `http://localhost:4200`)
+2.  **Запуск:** `npx ng build --output-path=../public --delete-output-path=true`
 
 ---
 
